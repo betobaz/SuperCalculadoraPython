@@ -1,27 +1,29 @@
 import expr_aritmetica
 import calculadora
+import validador_expr_aritmetica
 
 class Supercalculadora:
 
-	def __init__(self, parser):
+	def __init__(self, parser, validador):
 		self.calc = calculadora.Calculadora()
 		self.parser = parser
+		self.validador = validador
 
 	def __operar__(self,expr_descompuesta):
 		i = None
 		res_intermedio = 0
-		if '/' in expr_descompuesta['Operadores']:			
+		if '*' in expr_descompuesta['Operadores']:
+			i = expr_descompuesta['Operadores'].index('*')
+			res_intermedio = self.calc.multiplicar(expr_descompuesta['Operandos'][i], expr_descompuesta['Operandos'][i+1])
+		elif '/' in expr_descompuesta['Operadores']:			
 			i = expr_descompuesta['Operadores'].index('/')
 			res_intermedio = self.calc.dividir(expr_descompuesta['Operandos'][i], expr_descompuesta['Operandos'][i+1])
 		elif '-' in expr_descompuesta['Operadores']: 
 			i = expr_descompuesta['Operadores'].index('-')
 			res_intermedio = self.calc.restar(expr_descompuesta['Operandos'][i], expr_descompuesta['Operandos'][i+1])
-		elif '+' in expr_descompuesta['Operadores']: 
+		elif '+' in expr_descompuesta['Operadores']:
 			i = expr_descompuesta['Operadores'].index('+')
-			res_intermedio = self.calc.sumar(expr_descompuesta['Operandos'][i], expr_descompuesta['Operandos'][i+1])
-		elif '*' in expr_descompuesta['Operadores']: 
-			i = expr_descompuesta['Operadores'].index('*')
-			res_intermedio = self.calc.multiplicar(expr_descompuesta['Operandos'][i], expr_descompuesta['Operandos'][i+1])
+			res_intermedio = self.calc.sumar(expr_descompuesta['Operandos'][i], expr_descompuesta['Operandos'][i+1])		
 		else:
 			# Es un error, tenemos que decidir que hacer en los test siguientes
 			# Forzamos el error para que no haya problemas luego
@@ -43,5 +45,8 @@ class Supercalculadora:
 		return self.__simplificar__(expr_simplificada)
 
 	def calcular(self, expresion):		
+		if not self.validador.validar(expresion):
+			raise SyntaxError("La expresion no es valida")
+
 		return str(self.__simplificar__(self.parser.parse(expresion))['Operandos'][0])
 
